@@ -1,0 +1,33 @@
+# Core Deep Learning (CPU-optimized)
+tensorflow>=2.20.0
+numpy
+scipy
+
+# Computer Vision
+opencv-python
+opencv-contrib-python
+Pillow
+scikit-image
+
+# Face Detection
+mtcnn
+
+# Data Processing
+pandas
+scikit-learn
+
+# UI & Visualization
+streamlit
+matplotlib
+seaborn
+
+# Utilities
+tqdm
+pyyaml
+
+# Evaluation & Metrics
+scikit-metrics
+
+# Optional: Jupyter for development
+jupyter
+notebook

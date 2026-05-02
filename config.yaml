@@ -1,0 +1,177 @@
+# Configuration for Deepfake Detection Model
+# CPU-optimized settings for balanced accuracy/speed
+
+model:
+  # Image input size
+  image_height: 224
+  image_width: 224
+  
+  # Spatial Branch Architecture
+  spatial_branch:
+    conv_layers:
+      - filters: 32
+        kernel_size: 3
+        activation: relu
+      - filters: 64
+        kernel_size: 3
+        activation: relu
+      - filters: 128
+        kernel_size: 3
+        activation: relu
+    pooling_size: 2
+    global_pooling: average
+    dense_units: 256
+    dropout: 0.5
+  
+  # Frequency Branch Architecture
+  frequency_branch:
+    conv_layers:
+      - filters: 16
+        kernel_size: 3
+        activation: relu
+      - filters: 32
+        kernel_size: 3
+        activation: relu
+    pooling_size: 2
+    global_pooling: average
+    dense_units: 128
+    dropout: 0.5
+  
+  # Fusion Layer
+  fusion:
+    dense_layer_1:
+      units: 256
+      activation: relu
+      dropout: 0.3
+    dense_layer_2:
+      units: 128
+      activation: relu
+      dropout: 0.3
+    output_layer:
+      units: 1
+      activation: sigmoid
+
+training:
+  # Optimizer settings
+  optimizer: adam
+  learning_rate: 0.0001
+  beta_1: 0.9
+  beta_2: 0.999
+  epsilon: 1e-7
+  
+  # Training parameters
+  batch_size: 16  # CPU constraint
+  epochs: 100
+  validation_split: 0.1
+  
+  # Loss function
+  loss: binary_crossentropy
+  
+  # Class weights (if dataset is imbalanced)
+  # real: 1.0, fake: 1.0 (adjust based on data)
+  class_weights:
+    real: 1.0
+    fake: 1.0
+  
+  # Callbacks
+  early_stopping:
+    monitor: val_loss
+    patience: 15
+    restore_best_weights: true
+    min_delta: 0.001
+  
+  reduce_lr:
+    monitor: val_loss
+    factor: 0.5
+    patience: 5
+    min_lr: 1e-7
+  
+  model_checkpoint:
+    monitor: val_accuracy
+    save_best_only: true
+    mode: max
+
+data:
+  # Data split ratios
+  train_ratio: 0.70
+  val_ratio: 0.10
+  test_ratio: 0.20
+  
+  # Preprocessing
+  preprocessing:
+    normalize: true
+    normalize_range: [0, 1]  # Pixel values
+    grayscale_for_frequency: true
+  
+  # Data augmentation
+  augmentation:
+    horizontal_flip: true
+    rotation_range: 10
+    zoom_range: [0.8, 1.2]
+    brightness_range: [-0.1, 0.1]
+    contrast_range: [0.9, 1.1]
+    gaussian_noise: 0.01
+    apply_augmentation: true
+  
+  # Face detection
+  face_detection:
+    method: mtcnn  # or opencv_cascades
+    min_face_size: 50  # pixels
+    padding: 20  # pixels around detected face
+
+evaluation:
+  # Metrics to compute
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+    - auc_roc
+    - confusion_matrix
+  
+  # Threshold for classification
+  classification_threshold: 0.5
+  
+  # Robustness testing
+  robustness:
+    test_compression: true
+    test_noise: true
+    test_blur: true
+    test_brightness: true
+
+paths:
+  # Data paths
+  raw_data: ./data/real_vs_fake/real_vs_fake/real-vs-fake
+  train_data: ./data/real_vs_fake/real_vs_fake/real-vs-fake/train
+  valid_data: ./data/real_vs_fake/real_vs_fake/real-vs-fake/valid
+  test_data: ./data/real_vs_fake/real_vs_fake/real-vs-fake/test
+  models_dir: ./models
+  results_dir: ./results
+  logs_dir: ./results/training_logs
+  metrics_dir: ./results/metrics
+  predictions_dir: ./results/sample_predictions
+  
+  # Dataset paths (to be updated)
+  faceforensics_download: false  # Set to true if you have bandwidth
+  kaggle_dataset: false
+
+inference:
+  # Inference settings
+  batch_size: 8  # For batch processing
+  max_inference_time_ms: 500
+  return_confidence: true
+  return_processing_details: true
+
+visualization:
+  # Visualization settings
+  save_predictions: true
+  plot_confusion_matrix: true
+  plot_roc_curve: true
+  plot_training_history: true
+  sample_predictions_count: 10
+
+logging:
+  # Logging configuration
+  level: INFO
+  log_file: ./results/training_logs/training.log
+  save_tensorboard_logs: true
